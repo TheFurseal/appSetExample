@@ -1,4 +1,5 @@
 const IPC = require('node-ipc')
+var crypto = require('crypto')
 const debug = require('debug')('common:IPCManager')
 
 class IPCManager{
@@ -52,6 +53,12 @@ class IPCManager{
 
                     }
                 )
+                IPC.server.on(
+                    'error',
+                    function(err){
+                        console.log(err)
+                    }
+                )
                 
                 parent.serverHandleFuncs.forEach((element) => {
                     
@@ -89,7 +96,14 @@ class IPCManager{
                     'disconnect',
                     function(){
                         parent.serverConnected = false
-                        console.log('disconnected to server '+serverID)
+                        console.log('disconnected from server '+serverID)
+
+                    }
+                )
+                IPC.of[serverID].on(
+                    'error',
+                    function(err){
+                        console.log(err)
                     }
                 )
                 
@@ -146,35 +160,60 @@ class IPCManager{
     }
 
     serverEmit(event,data,sock){
+        if(event == null){
+            console.error('empty event')
+            return
+        }
+        if(data == null){
+            console.error('empty data')
+            return
+        }
         if(sock == null){
             sock = this.clientSockTmp
         }
+
+        if(sock != null){
+            IPC.server.emit(
+                sock,
+                event,
+                data
+            )
+        }
        
-        IPC.server.emit(
-            sock,
-            event,
-            data
-        )
+        
 
     }
 
     clientEmit(event,data,sock){
+        if(event == null){
+            console.error('empty event')
+            return
+        }
+        if(data == null){
+            console.error('empty data')
+            return
+        }
         if(sock == null){
             sock = this.serverID
         }
-      
-        IPC.of[sock].emit(
-            event,
-            data
-        )
+        
+        if(sock != null){
+            IPC.of[sock].emit(
+                event,
+                data
+            )
+        }
+        
     }
 
     serverDisconnect(){
         IPC.server.stop()
+        this.clientSockTmp = null
     }
 
     clientDisconnect(){
         IPC.disconnect()
+        this.serverID = null
     }
 
    

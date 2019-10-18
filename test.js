@@ -1,19 +1,14 @@
-const Process = require('process')
-const fs = require('fs')
-var archiver = require('archiver')
-var unzip = require('unzip-stream')
-
-var path = '/Users/john/Library/Application Support/CoTNetwork/resultTmp/1569221262562_4_3.zip'
-var to = '/Users/john/Library/Application Support/CoTNetwork/resultTmp/1569221262562_4_3_test'
 
 
-console.log('start')
-var stream = fs.createReadStream(path).pipe(unzip.Extract({ path: to }));
 
-stream.on('finish',() => {
-	console.log('finish')
-})
-
-console.log('end')
+var confPath = '12345.cot'
+var check = confPath.substr(confPath.length-4,4)
+if(check != '.cot'){
+	console.log('not configure')
+	console.log(check)
+}else{
+	console.log('is configure')
+	console.log(check)
+}
 
 

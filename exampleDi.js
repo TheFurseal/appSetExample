@@ -8,7 +8,7 @@ const {Registry} = require('rage-edit')
 // ipc id [setName]_[moduleName]
 const ID = 'maya_test_dividor'
 
-var minFrame = 5
+var minFrame = 50
 var ipcManager = new IPCManager()
 ipcManager.createServer({
     id:ID
@@ -249,11 +249,13 @@ function mainLooper(){
                    console.error(err)
                }else{
                    items.forEach((element) => {
-                       if(element.includes('.cot')){
-                           
-                           var config = readConfig(appDataPath+'/'+element)
-                           divid(config)
-                       }
+                    var check = element.substr(element.length-4,4)
+                    if(check != '.cot'){
+                        return
+                    }else{
+                        var config = readConfig(appDataPath+'/'+element)
+                        divid(config)
+                    }
                    })
 
                }
