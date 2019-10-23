@@ -5,7 +5,7 @@ const {Registry} = require('rage-edit')
 var Spawn = require('child_process').spawn
 const unzip = require('unzip')
 const Child = require('child_process')
-var Find = require('findit')
+var recursive = require("recursive-readdir")
 var archiver = require('archiver')
 
 
@@ -58,50 +58,55 @@ function resetIO(data,callback){
 
     readStream.on('close',() => {
         console.log('end unzip input file to '+noFormat)
-        var finder = Find(noFormat)
-        finder.on('file', function (file, stat) {
-            var format = file.substring(file.length-3)
-            if(format == '.mb'){
+        recursive(noFormat, function (err, files) {
+            if(err){
+                console.error(err)
+            }else{
+                files.forEach(file => {
+                    var format = file.substring(file.length-3)
+                    if(format == '.mb'){
 
-                for(var i=0; i<cmdParam.length; i++){
-                    var tmp = cmdParam[i]
-                    if(tmp == '[CMD]'){
-                        cmdParam[i] = binPath
-                    }else if(tmp == '[INPUT_PATH]'){
-                    
-                        cmdParam[i] = file
-                    }else if(tmp == '[OUTPUT_PATH]'){
-                        cmdParam[i] = tmpPath+'/'+data.unprotected.blockName
-                        outPutPath =  tmpPath+'/'+data.unprotected.blockName
-                        outPutPath = fixFilePath(outPutPath)
-                        if(!fs.existsSync(outPutPath)){
-                            fs.mkdirSync(outPutPath,{
-                                recursive:true
-                            })
+                        for(var i=0; i<cmdParam.length; i++){
+                            var tmp = cmdParam[i]
+                            if(tmp == '[CMD]'){
+                                cmdParam[i] = binPath
+                            }else if(tmp == '[INPUT_PATH]'){
+                            
+                                cmdParam[i] = file
+                            }else if(tmp == '[OUTPUT_PATH]'){
+                                cmdParam[i] = tmpPath+'/'+data.unprotected.blockName
+                                outPutPath =  tmpPath+'/'+data.unprotected.blockName
+                                outPutPath = fixFilePath(outPutPath)
+                                if(!fs.existsSync(outPutPath)){
+                                    fs.mkdirSync(outPutPath,{
+                                        recursive:true
+                                    })
+                                }
+                            }else{
+                                
+                            }
+                            if(result == ''){
+                                result = cmdParam[i]
+                            }else{
+                                result = result + ' ' +cmdParam[i]
+                            }
                         }
-                    }else{
-                        
-                    }
-                    if(result == ''){
-                        result = cmdParam[i]
-                    }else{
-                        result = result + ' ' +cmdParam[i]
-                    }
                     
-                }
-            
-                result = fixFilePath(result)
-            
-                data.protected.command = result
-                console.log('reset result '+result)
+                        result = fixFilePath(result)
+                    
+                        data.protected.command = result
+                        console.log('reset result '+result)
 
-                
-                if(callback != null){
-                    callback(data)
-                }else{
-                    console.error('callback is empty!!!!!')
-                }
+                        
+                        if(callback != null){
+                            callback(data)
+                        }else{
+                            console.error('callback is empty!!!!!')
+                        }
+                    }
+                })
             }
+            
         });
     })
     readStream.on('error',(err) => {

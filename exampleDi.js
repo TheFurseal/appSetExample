@@ -8,7 +8,7 @@ const {Registry} = require('rage-edit')
 // ipc id [setName]_[moduleName]
 const ID = 'maya_test_dividor'
 
-var minFrame = 50
+var minFrame = 5
 var ipcManager = new IPCManager()
 ipcManager.createServer({
     id:ID
