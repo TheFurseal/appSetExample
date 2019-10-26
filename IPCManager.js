@@ -90,9 +90,16 @@ class IPCManager{
             parent.IPC.of[parent.serverID].on('err',function(err){
                 console.log(err)
             })
+            var count = 0
             parent.clientHandleFuncs.forEach(element => {
                 parent.IPC.of[parent.serverID].on(element.event,element.callback)
+                if(++count == parent.clientHandleFuncs.length){
+                    parent.clientHandleFuncs = []
+                    debug('set callbacks done')
+                }
             });
+
+            
         })
        
     }
