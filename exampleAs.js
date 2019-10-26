@@ -2,7 +2,7 @@ const IPCManager = require('./IPCManager.js')
 const {ffmpeg} = require('ffmpeg-stream')
 const fs = require('fs')
 const unzip = require('unzip-stream')
-const Find = require('findit')
+var recursive = require("recursive-readdir")
 
 
 console.log('version: 0.0.4')
@@ -27,7 +27,6 @@ async function frameConvertor(frames,outPath,callback){
     conv.output(outPath, {vcodec: 'libx264', pix_fmt: 'yuv420p'}) // output to file
 
     // for every frame create a function that returns a promise
-    console.log(frames)
     frames.map(filename => () =>
     new Promise((resolve, reject) =>
         fs.createReadStream(filename)
@@ -55,45 +54,51 @@ async function frameConvertor(frames,outPath,callback){
 
 function doAssimilate(data,callback){
     var frames = []
+    var dirs = []
     var total = 0
     data.outputs.forEach((element) => {
         console.log('read '+element.path)
         var noFormat = element.path.split('.zi')
         noFormat = noFormat[0]
+        dirs.push(noFormat)
         var readStream = fs.createReadStream(element.path)
         readStream.pipe(unzip.Extract({path:noFormat}))
         readStream.on('close',() => {
-            var finder = Find(noFormat)
-            finder.on('file',(file,stat) => {
-                if(file.includes('.png')){
-                    if(frames.indexOf(file) < 0){
-                        frames.push(file)
-                    }
+            recursive(noFormat, (err, files) => {
+                if(err){
+                    console.error(err)
+                    console.error(noFormat)
+                }else{
+                    files.forEach( file => {
+                        if(file.includes('.png')){
+                            if(frames.indexOf(file) < 0){
+                                frames.push(file)
+                            }
+                        }
+                    })
+                    total++
                 }
             })
-           
-            total++
-        })
-            
+        })  
     })
    
-    var handler = setInterval(() => {
+    var handler2 = setInterval(() => {
         if(total == data.outputs.length){
-            clearInterval(handler)
-            var sortstring = function (a, b)    {
-                
+            clearInterval(handler2)
+            var sortstring = function (a, b){
                 a = a.split('result.png')
                 a = a[a.length-1]
                 b = b.split('result.png')
                 b = b[b.length-1]
                 return a.localeCompare(b);
-               
             }
-            
             var savePath = data.workName+'.mp4'
             var appDataPath = data.outputs[0].path.split('/CoTNetwork')
             appDataPath = appDataPath[0]
-            var savePath = appDataPath+'/CoTNetwork/resultTmp/'+data.workName+'.mp4'
+            var savePath = appDataPath+'/CoTNetwork/outputs/'+data.workName+'.mp4'
+            if(fs.existsSync(savePath)){
+                fs.unlinkSync(savePath)
+            }
             frameConvertor(frames.sort(sortstring),savePath,callback)
         }
         
@@ -117,8 +122,8 @@ function run(data){
        doAssimilate(data,(err,resultPath) => {
             if(err == null){
                 msg.result = 'YES'
-                msg.outputFilePath = {}
-                msg.outputFilePath.path = resultPath
+                msg.outputFile = {}
+                msg.outputFile.path = resultPath
                 msg.workName = data.workName
                 ipcManager.serverEmit('result',JSON.stringify(msg))
             }else{
@@ -135,7 +140,6 @@ function run(data){
         msg.workName = data.workName
         ipcManager.serverEmit('result',JSON.stringify(msg))
     }
-    
 }
 
 

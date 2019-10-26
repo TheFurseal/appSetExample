@@ -291,6 +291,7 @@ ipcManager.createServer({
 })
 
 ipcManager.addServerListenner('request',(data,socket) => {
+    console.log('request come')
     run(data)
 })
 
