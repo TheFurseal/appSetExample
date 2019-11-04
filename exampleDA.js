@@ -10,7 +10,7 @@ var archiver = require('archiver')
 
 
 
-var ID = 'maya_test_dapp'
+var ID = 'maya_win_dapp'
 
 console.log('version: 0.0.4')
 
