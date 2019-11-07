@@ -10,7 +10,7 @@ var archiver = require('archiver')
 
 
 
-var ID = 'maya_win_dapp'
+var ID = 'maya_test_dapp'
 
 console.log('version: 0.0.4')
 
@@ -228,12 +228,18 @@ function run(data){
             console.log(data.toString())
         })
         setTimeout(() => {
+        	var locker = false
              var handle = setInterval(() => {
+             	if(locker){
+             		return
+             	}
+             	locker = true
                 getPIDByName('Render.exe',(pid) => {
                     if(pid < 0){
                         clearInterval(handle)
                         constructResult(result)
                     }
+                    locker = false
                 })
             },1000)
         },10000)

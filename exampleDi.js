@@ -6,7 +6,7 @@ const fs = require('fs')
 const {Registry} = require('rage-edit')
 
 // ipc id [setName]_[moduleName]
-const ID = 'maya_win_dividor'
+const ID = 'maya_test_dividor'
 
 var minFrame = 5
 var ipcManager = new IPCManager()
@@ -215,7 +215,7 @@ function divid(conf){
     input.protected.inputFiles.push(file1)
 
     input.unprotected = {}
-    input.unprotected.appSet = 'maya_win'
+    input.unprotected.appSet = 'maya_test'
     input.unprotected.target = ['darwin-x86_64','linux-amd64','linux-x86_64','windows-x86_64']
     input.unprotected.block = {}
 

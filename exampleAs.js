@@ -7,7 +7,7 @@ var recursive = require("recursive-readdir")
 
 console.log('version: 0.0.4')
 
-var ID = 'maya_win_assimilator'
+var ID = 'maya_test_assimilator'
 
 var ipcManager = new IPCManager() 
 
