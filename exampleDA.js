@@ -12,6 +12,9 @@ var archiver = require('archiver')
 
 var ID = 'maya_test_dapp'
 
+// node-ipc may lose message, use this to make sure message has recived by client
+var feedback = {}
+
 console.log('version: 0.0.4')
 
 var ipcManager = new IPCManager()
@@ -263,10 +266,16 @@ function constructResult(data){
         outputFile.path = outPath+'.zip'
         data.protected.outputFiles = []
         data.protected.outputFiles.push(outputFile)
-
-        //send result
+        feedback[data.unprotected.blockName] = data.unprotected.blockName
         ipcManager.serverEmit('result',JSON.stringify(data))
-        console.log('result reported')
+        //send result
+        var handle = setInterval(()=> {
+            if(feedback[data.unprotected.blockName] == null){
+                clearInterval(handle)
+            }else{
+                ipcManager.serverEmit('result',JSON.stringify(data)) 
+            }
+        },5000)
     })
 
     archive.on('error', function(err){
@@ -299,6 +308,12 @@ ipcManager.createServer({
 ipcManager.addServerListenner('request',(data,socket) => {
     console.log('request come')
     run(data)
+})
+
+ipcManager.addServerListenner('feedback',(data,socket) => {
+    if(data != null){
+        delete feedback[data]
+    }
 })
 
 ipcManager.serve()
