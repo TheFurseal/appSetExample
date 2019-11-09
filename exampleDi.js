@@ -212,6 +212,7 @@ function divid(conf){
         return
     }
     var workNumber = (conf.endFrame - conf.startFrame + 1)/minFrame
+    workNumber = Math.ceil(workNumber)
 
     var x = Math.sqrt(workNumber)
     x = Math.ceil(x)
@@ -253,7 +254,12 @@ function divid(conf){
                 var globalIndex = i+j*x
                 input.unprotected.blockName = input.workName+'_'+i+'_'+j
                 input.unprotected.block.index = i+'_'+j
-                input.protected.command = '[CMD] -r file -rd [OUTPUT_PATH] -im result.png -s '+(globalIndex*minFrame)+' -e '+((globalIndex+1)*minFrame)+' [INPUT_PATH]'
+                var start = (globalIndex*minFrame)
+                var end = ((globalIndex+1)*minFrame)
+                if(end > conf.endFrame){
+                    end = conf.endFrame
+                }
+                input.protected.command = '[CMD] -r file -rd [OUTPUT_PATH] -im result.png -s '+start+' -e '+end+' [INPUT_PATH]'
                 ipcManager.serverEmit('request',JSON.stringify(input))
                 feedBack[input.unprotected.blockName] = input
             }
