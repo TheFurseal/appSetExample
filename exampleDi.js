@@ -8,11 +8,28 @@ const {Registry} = require('rage-edit')
 // ipc id [setName]_[moduleName]
 const ID = 'maya_test_dividor'
 
+var feedBack = {}
 var minFrame = 5
 var ipcManager = new IPCManager()
 ipcManager.createServer({
     id:ID
 })
+
+ipcManager.addServerListenner('feedback',(data,socket) => {
+    if(data != null){
+        delete feedBack[data]
+    }else{
+        console.error('Empty feedback !!!')
+    }
+})
+
+
+setInterval(() => {
+    var keys = Object.keys(feedBack)
+    keys.forEach(elem => {
+        ipcManager.serverEmit('request',feedBack[elem])
+    })
+}, 30000);
 
 /**************************** start of custom code  ******************************/
 
@@ -238,6 +255,7 @@ function divid(conf){
                 input.unprotected.block.index = i+'_'+j
                 input.protected.command = '[CMD] -r file -rd [OUTPUT_PATH] -im result.png -s '+(globalIndex*minFrame)+' -e '+((globalIndex+1)*minFrame)+' [INPUT_PATH]'
                 ipcManager.serverEmit('request',JSON.stringify(input))
+                feedBack[input.unprotected.blockName] = input
             }
         }
     }  
