@@ -1,7 +1,8 @@
 const IPCManager = require('./IPCManager.js')
 
 
-const ID = 'maya_test_validator'
+const appSetName = 'maya_win'
+const ID = appSetName+'_validator'
 
 var ipcManager = new IPCManager()
 ipcManager.createServer({
