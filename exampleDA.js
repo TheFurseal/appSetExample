@@ -15,14 +15,6 @@ var ID = 'maya_test_dapp'
 // node-ipc may lose message, use this to make sure message has recived by client
 var feedback = {}
 
-setInterval(() => {
-    var keys = Object.keys(feedback)
-    keys.forEach(ele => {
-        ipcManager.serverEmit('result',feedback[ele])
-    })
-    
-}, 30000);
-
 console.log('version: 0.0.4')
 
 var ipcManager = new IPCManager()
@@ -274,7 +266,7 @@ function constructResult(data){
         outputFile.path = outPath+'.zip'
         data.protected.outputFiles = []
         data.protected.outputFiles.push(outputFile)
-        feedback[data.unprotected.blockName] = data.unprotected.blockName
+        feedback[data.unprotected.blockName] = data
         //send result
         ipcManager.serverEmit('result',JSON.stringify(data))
         
@@ -314,6 +306,7 @@ ipcManager.addServerListenner('request',(data,socket) => {
 
 ipcManager.addServerListenner('feedback',(data,socket) => {
     if(data != null){
+        console.log('feedback '+data)
         delete feedback[data]
     }else{
         console.error('Empty feedback')
@@ -321,6 +314,16 @@ ipcManager.addServerListenner('feedback',(data,socket) => {
 })
 
 ipcManager.serve()
+
+setInterval(() => {
+    var keys = Object.keys(feedback)
+    keys.forEach(ele => {
+        console.log('resend '+ele)
+        console.log(JSON.stringify(feedback[ele]))
+        ipcManager.serverEmit('result',JSON.stringify(feedback[ele]))
+    })
+    
+}, 30000);
 
 
 
