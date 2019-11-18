@@ -10,7 +10,7 @@ var archiver = require('archiver')
 
 
 
-const appSetName = 'maya_win'
+const appSetName = 'mayaRender'
 const ID = appSetName+'_dapp'
 
 // node-ipc may lose message, use this to make sure message has recived by client

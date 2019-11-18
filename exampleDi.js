@@ -6,7 +6,7 @@ const fs = require('fs')
 const {Registry} = require('rage-edit')
 
 // ipc id [setName]_[moduleName]
-const appSetName = 'maya_win'
+const appSetName = 'mayaRender'
 const ID = appSetName+'_dividor'
 
 var feedBack = {}
@@ -184,7 +184,6 @@ function install(){
        }
     }else{
         console.log('scripts already installed')
-        console.log(Process.env)
     }
    
     
