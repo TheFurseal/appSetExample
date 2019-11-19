@@ -41,11 +41,13 @@ async function frameConvertor(frames,outPath,callback){
     ),
   )
   // reduce into a single promise, run sequentially
-  .reduce((prev, next) => prev.then(next), Promise.resolve())
+  .reduce((prev, next) => prev.then(next), Promise.resolve().catch(err => {console.log(err)}))
   // end converter input
   .then(() => {
     input.end()
     callback(null,outPath)
+  }).catch(err => {
+      console.error(err)
   })
 
     conv.run()
@@ -70,41 +72,53 @@ function doAssimilate(data,callback){
                     console.error(err)
                     console.error(noFormat)
                 }else{
-                    files.forEach( file => {
+                    for(var i = 0; i< files.length; i++){
+                        var file = files[i]
                         if(file.includes('.png')){
                             if(frames.indexOf(file) < 0){
                                 frames.push(file)
                             }
                         }
-                    })
-                    total++
+                    }
                 }
+                if(++total == data.outputs.length){
+                    var sortstring = function (a, b){
+                        a = a.split('.')
+                        a = a[a.length-2]
+                        a = parseInt(a)
+                        b = b.split('.')
+                        b = b[b.length-2]
+                        b = parseInt(b)
+                        if(a > b ){
+                            return 1
+                        }else if(a < b){
+                            return -1
+                        }else{
+                            return 0
+                        }
+                    }
+                    var savePath = data.workName+'.mp4'
+                    var appDataPath = data.outputs[0].path.split('/CoTNetwork')
+                    appDataPath = appDataPath[0]
+                    var savePath = appDataPath+'/CoTNetwork/outputs/'+data.workName+'.mp4'
+                    if(fs.existsSync(savePath)){
+                        fs.unlinkSync(savePath)
+                    }
+                    var tmp = frames.sort(sortstring)
+                    var uniqueArr = tmp.filter((elem,pos) => {
+                        return tmp.indexOf(elem) == pos
+                    })
+                   
+                    frameConvertor(uniqueArr,savePath,callback).then(() => {
+                        console.log('process done!')
+                    }).catch((err) => {
+                        console.error(err)
+                    })
+                }
+
             })
         })  
     })
-   
-    var handler2 = setInterval(() => {
-        if(total == data.outputs.length){
-            clearInterval(handler2)
-            var sortstring = function (a, b){
-                a = a.split('result.png')
-                a = a[a.length-1]
-                b = b.split('result.png')
-                b = b[b.length-1]
-                return a.localeCompare(b);
-            }
-            var savePath = data.workName+'.mp4'
-            var appDataPath = data.outputs[0].path.split('/CoTNetwork')
-            appDataPath = appDataPath[0]
-            var savePath = appDataPath+'/CoTNetwork/outputs/'+data.workName+'.mp4'
-            if(fs.existsSync(savePath)){
-                fs.unlinkSync(savePath)
-            }
-            frameConvertor(frames.sort(sortstring),savePath,callback)
-        }
-        
-    }, 1000);
-   
 }
 
 // validation code
