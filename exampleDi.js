@@ -226,7 +226,7 @@ function divid(conf){
     var file1 = {};
     var fileNameTmp = conf.path.split('/')
     file1.fileName = fileNameTmp[fileNameTmp.length-1]
-    file1.url = conf.path
+    file1.path = conf.path
     file1.size = 1027;
     file1.md5 = 'unknow4';
     file1.type = 'public'
